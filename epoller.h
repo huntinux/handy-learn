@@ -29,7 +29,7 @@ public:
 
     void loop() {
         std::cout << "EVENT LOOP STARTS" << std::endl;
-        int n = epoll_wait(epfd_, activeEvs_, kMaxEvents, 1000);
+        int n = epoll_wait(epfd_, activeEvs_, kMaxEvents, 10000);
         while (--n >= 0) {
             int i = n;
             Channel* ch = (Channel*)activeEvs_[i].data.ptr;

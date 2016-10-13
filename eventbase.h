@@ -2,6 +2,7 @@
 #define EVENTBASE_H
 
 #include <iostream>
+#include <memory>
 #include "util.h"
 #include "epoller.h"
 
@@ -10,9 +11,10 @@ class EventBase : noncopyable
 {
 public:
     EventBase()
-        : exited_(false), poller_(new EPoller)
+        : exited_(false),
+          poller_(std::make_shared<EPoller>())
     {}
-    ~EventBase() { delete poller_; }
+    ~EventBase() { }
 
     void exit()
     {
@@ -30,14 +32,14 @@ public:
         poller_->addChannel(ch);
     }
 
-    EPoller* getPoller()
+    std::shared_ptr<EPoller> getPoller()
     {
         return poller_;
     }
 
 private:
     bool exited_;
-    EPoller* poller_;
+    std::shared_ptr<EPoller> poller_;
 };
 
 

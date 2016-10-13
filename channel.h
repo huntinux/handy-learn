@@ -2,6 +2,8 @@
 #define CHANNEL_H
 
 #include <functional>
+#include <memory>
+#include <iostream>
 
 /**
  * @brief The Channel class
@@ -12,7 +14,7 @@ class Channel
     using EventCallBack = std::function<void()>;
 public:
     //base为事件管理器，fd为通道内部的fd，events为通道关心的事件
-    Channel(EPoller* poller, int fd, int events)
+    Channel(std::shared_ptr<EPoller> poller, int fd, int events)
         : poller_(poller),
           fd_(fd),
           events_(events)
@@ -47,7 +49,7 @@ public:
     void handleError() { errorcb_(); }
 
 private:
-    EPoller *poller_;
+    std::shared_ptr<EPoller> poller_;
     int fd_;
     short events_;
     EventCallBack readcb_, writecb_,errorcb_;
