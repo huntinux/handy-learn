@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <string.h>
 #include "channel.h"
+#include "util.h"
 
 /**
  * @brief The EPoller class
@@ -63,7 +64,7 @@ public:
         ev.data.ptr = ch;
         std::cout <<"add channel:" << std::hex << ch
                   <<" fd:" << ch->fd()
-                  <<" events:" << ch->events()
+                  <<" events:" << EpollEvent2String(ch->events())
                   <<" epoll:"<<epfd_ << std::endl;
         int r = epoll_ctl(epfd_, EPOLL_CTL_ADD, ch->fd(), &ev);
         if(r < 0)
