@@ -68,7 +68,7 @@ private:
     std::string addr_;
     int listenfd_;
     Channel *listenChannel_;
-    EventHandler readcb_, writecb, errorcb;
+    EventHandler readcb_, writecb_, errorcb_;
 };
 
 #endif // TCPSERVER_H
