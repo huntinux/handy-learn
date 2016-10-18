@@ -1,14 +1,28 @@
 #include <iostream>
-#include "eventbase.h"
-#include "channel.h"
 #include <sys/socket.h>
 #include <sys/timerfd.h>
 #include <unistd.h>
+
+#include "eventbase.h"
+#include "channel.h"
+#include "tcpserver.h"
 
 using namespace std;
 
 int main()
 {
+    /**
+     * Test TcpServer, TcpConn
+     */
+    EventBase eb;
+    TcpServer server(&eb, "8080");
+    eb.loop();
+
+
+    /**
+     * Test EventBase, Channel, Poller
+     */
+#ifdef TEST_TIMERFD
     EventBase eb;
     int timerfd = ::timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
     assert(timerfd >= 0);
@@ -28,6 +42,7 @@ int main()
     eb.addChannel(&channel);
     eb.loop();
     ::close(timerfd);
+#endif
     return 0;
 }
 

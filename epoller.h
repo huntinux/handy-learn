@@ -46,7 +46,7 @@ public:
                               <<" fd:" << ch->fd()
                               <<" handle write" << std::endl;
                     ch->handleWrite();
-                } else { // EPOLLERR
+                } else { // EPOLLERR EPOLLHUP
                     std::cout <<"channel:" << std::hex << ch
                               <<" fd:" << ch->fd()
                               <<" handle error" << std::endl;

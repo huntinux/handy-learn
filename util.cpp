@@ -1,5 +1,7 @@
 #include "util.h"
 
+const int kInvalidSocket = -1;
+
 std::string EpollEvent2String(int events)
 {
     std::string evstr;
@@ -23,3 +25,9 @@ std::string EpollEvent2String(int events)
         evstr += "EPOLLLT";
     return evstr;
 }
+
+//int create_and_bind(const char* addr, short port)
+//{
+//
+//    return kInvalidSocket;
+//}
