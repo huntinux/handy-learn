@@ -45,7 +45,7 @@ public:
             Channel* ch = (Channel*)activeEvs_[i].data.ptr;
             int events = activeEvs_[i].events;
             if (ch) {
-                if (events & EPOLLIN ) {
+                if (events & (EPOLLIN | EPOLLPRI | EPOLLRDHUP) ) {
                     std::cout <<"channel:" << std::hex << ch
                               <<" fd:" << ch->fd()
                               <<" handle read" << std::endl;
@@ -55,7 +55,7 @@ public:
                               <<" fd:" << ch->fd()
                               <<" handle write" << std::endl;
                     ch->handleWrite();
-                } else { // EPOLLERR EPOLLHUP
+                } else { // EPOLLERR EPOLLHUP 
                     std::cout <<"channel:" << std::hex << ch
                               <<" fd:" << ch->fd()
                               <<" handle error" << std::endl;
