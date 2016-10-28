@@ -8,7 +8,6 @@
 #include "util.h"
 #include "net.h"
 #include "channel.h"
-#include "eventbase.h"
 #include "tcpconn.h"
 
 /**
@@ -21,16 +20,14 @@ class TcpServer : private noncopyable
     using EventHandler = std::function<void()>;
 public:
 
-    TcpServer(EventBase *eventBase,
-              const std::string port = "8080",
+    TcpServer(const std::string port = "8080",
               const std::string addr = "0.0.0.0")
-        : eventBase_(eventBase),
+        : epoller_(new EPoller()),
           port_(port),
           addr_(addr),
           listenfd_(kInvalidSocket),
           listenChannel_(nullptr)
     {
-        start();
     }
 
     ~TcpServer() {
@@ -46,17 +43,16 @@ public:
         printf_address(connfd, (struct sockaddr *)&sa, sa_len, "Accept");
       
         /* create new TcpConn to handle the connection */
-        TcpConn* conn = new TcpConn(eventBase_, connfd);
+        TcpConn* conn = new TcpConn(epoller_, connfd);
         connections_[connfd] = conn;
     }
 
-private:
     bool start()
     {
         listenfd_ = create_and_bind(port_.c_str(), addr_.c_str());
         assert(listenfd_ != kInvalidSocket);
         assert(listen(listenfd_, SOMAXCONN) != -1);
-        listenChannel_ = new Channel(eventBase_->getPoller(), listenfd_, EPOLLIN);
+        listenChannel_ = new Channel(epoller_, listenfd_, EPOLLIN);
         listenChannel_->onRead([this]{
             std::cout << "Handle Read In TcpServer." << std::endl;
             HandleAccept();
@@ -67,11 +63,14 @@ private:
         listenChannel_->onError([]{
             std::cout << "Handle Error In TcpServer." << std::endl;
         });
-        eventBase_->addChannel(listenChannel_);
+
+        /* add listen channel and start epoller */
+        epoller_->addChannel(listenChannel_);
+        epoller_->loop(); 
     }
 
 private:
-    EventBase *eventBase_;
+    EPoller *epoller_;
     std::string port_;
     std::string addr_;
     int listenfd_;

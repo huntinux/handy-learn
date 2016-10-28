@@ -3,7 +3,6 @@
 #include <sys/timerfd.h>
 #include <unistd.h>
 
-#include "eventbase.h"
 #include "channel.h"
 #include "tcpserver.h"
 
@@ -11,25 +10,28 @@ using namespace std;
 
 int main()
 {
+#define TEST_TCPSERVER
+#ifdef TEST_TCPSERVER
     /**
      * Test TcpServer, TcpConn
      */
-    EventBase eb;
-    TcpServer server(&eb, "9999");
-    eb.loop();
+    TcpServer server("9999");
+    server.start();
+#endif
 
 
     /**
-     * Test EventBase, Channel, Poller
+     * Test Channel, Poller
      */
+//#define TEST_TIMERFD
 #ifdef TEST_TIMERFD
-    EventBase eb;
+    EPoller epoller;
     int timerfd = ::timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
     assert(timerfd >= 0);
-    Channel channel(eb.getPoller(), timerfd, EPOLLIN);
+    Channel channel(&epoller, timerfd, EPOLLIN);
     channel.onRead([&]{
         std::cout << "Timeout" << std::endl;
-        eb.exit();
+        epoller.exit();
     });
     struct itimerspec howlong;
     bzero(&howlong, sizeof howlong);
@@ -39,8 +41,8 @@ int main()
         perror("timerfd_settime");
         exit(EXIT_FAILURE);
     }
-    eb.addChannel(&channel);
-    eb.loop();
+    epoller.addChannel(&channel);
+    epoller.loop();
     ::close(timerfd);
 #endif
     return 0;

@@ -18,7 +18,7 @@ class EPoller
 {
 public:
     EPoller()
-        : epfd_(epoll_create1(EPOLL_CLOEXEC))
+        : epfd_(epoll_create1(EPOLL_CLOEXEC)), quit_(false)
     {
         if(epfd_ < 0)
         {
@@ -29,10 +29,19 @@ public:
     ~EPoller(){}
 
     void loop() {
+      while(!quit_) {
+        loop_once();
+      }
+    }
+
+    void exit() {
+      quit_ = true;
+    }
+
+    void loop_once() {
         std::cout << "EVENT LOOP STARTS" << std::endl;
         int n = epoll_wait(epfd_, activeEvs_, kMaxEvents, 10000);
-        while (--n >= 0) {
-            int i = n;
+        for(int i = 0; i < n; i++) {
             Channel* ch = (Channel*)activeEvs_[i].data.ptr;
             int events = activeEvs_[i].events;
             if (ch) {
@@ -57,7 +66,6 @@ public:
     }
     void addChannel(Channel* ch)
     {
-        //TODO: check param
         struct epoll_event ev;
         memset(&ev, 0, sizeof(ev));
         ev.events = ch->events();
@@ -83,6 +91,7 @@ private:
     int epfd_;
     std::set<Channel*> channels_;
     struct epoll_event activeEvs_[kMaxEvents];
+    bool quit_;
 };
 
 #endif // EPOLLER_H

@@ -2,16 +2,17 @@
 #define TCPCONN_H
 
 #include "channel.h"
-#include "eventbase.h"
+#include "util.h"
 #include "net.h"
+#include "epoller.h"
 
 class TcpConn
 {
 public:
-    TcpConn(EventBase* eventbase, int connfd) 
-        : eventBase_(eventbase), connfd_(connfd) 
+    TcpConn(EPoller* epoller, int connfd) 
+        : epoller_(epoller), connfd_(connfd) 
     { 
-        channel_ = new Channel(eventBase_->getPoller(), connfd_, EPOLLIN);
+        channel_ = new Channel(epoller_, connfd_, EPOLLIN);
         channel_->onRead([this]{
             std::cout << "Handle Read In TcpServer." << std::endl;
             close(connfd_);
@@ -23,14 +24,14 @@ public:
         channel_->onError([]{
             std::cout << "Handle Error In TcpServer." << std::endl;
         });
-        eventBase_->addChannel(channel_);
+        epoller_->addChannel(channel_);
     }
     ~TcpConn() {
       if(connfd_ != kInvalidSocket)
         close(connfd_);
     }
 private:
-    EventBase *eventBase_;
+    EPoller* epoller_;
     int connfd_;
     Channel *channel_;
 };
