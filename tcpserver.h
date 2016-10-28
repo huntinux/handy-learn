@@ -3,11 +3,13 @@
 
 #include <string>
 #include <functional>
+#include <map>
 #include <iostream> // TODO: Change to log util
 #include "util.h"
 #include "net.h"
 #include "channel.h"
 #include "eventbase.h"
+#include "tcpconn.h"
 
 /**
  * @brief The TcpServer class
@@ -31,6 +33,9 @@ public:
         start();
     }
 
+    ~TcpServer() {
+        delete listenChannel_;
+    }
 
     void HandleAccept()
     {
@@ -39,7 +44,10 @@ public:
         int connfd = accept(listenfd_, (struct sockaddr *)&sa, &sa_len);
         assert(connfd != kInvalidSocket);
         printf_address(connfd, (struct sockaddr *)&sa, sa_len, "Accept");
-        close(connfd);
+      
+        /* create new TcpConn to handle the connection */
+        TcpConn* conn = new TcpConn(eventBase_, connfd);
+        connections_[connfd] = conn;
     }
 
 private:
@@ -69,6 +77,7 @@ private:
     int listenfd_;
     Channel *listenChannel_;
     EventHandler readcb_, writecb_, errorcb_;
+    std::map<int, TcpConn*> connections_; // one connected fd one TcpConn
 };
 
 #endif // TCPSERVER_H
