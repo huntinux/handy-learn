@@ -1,10 +1,7 @@
-#简介
-学习handy的记录。
-https://github.com/yedf/handy.git
 
-#版本
 
-##v0.0.1
-单线程、只支持Linux下的epoll。
-基本实现EventBase、Channel、Poller。
-使用timerfd测试通过。
+经过思考，觉得EventBase目前没什么用，因此这个分支去掉了EventBase
+
+![类图](https://github.com/huntinux/handy-learn/blob/no_eventbase/doc/class.png)
+
+目前最关键的类是EPoller和Channel
