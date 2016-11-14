@@ -3,7 +3,7 @@
 
 #include <string>
 #include <functional>
-#include <map>
+#include <unordered_map>
 #include <iostream> // TODO: Change to log util
 #include "util.h"
 #include "net.h"
@@ -76,7 +76,7 @@ private:
     int listenfd_;
     Channel *listenChannel_;
     EventHandler readcb_, writecb_, errorcb_;
-    std::map<int, TcpConn*> connections_; // one connected fd one TcpConn
+    std::unordered_map<int, TcpConn*> connections_; // one connected fd one TcpConn
 };
 
 #endif // TCPSERVER_H

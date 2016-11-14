@@ -15,8 +15,14 @@ public:
         channel_ = new Channel(epoller_, connfd_, EPOLLIN);
         channel_->onRead([this]{
             std::cout << "Handle Read In TcpServer." << std::endl;
-            close(connfd_);
-            connfd_ = kInvalidSocket;
+            char buf[1024];
+            int n = read(connfd_, buf, 1024);
+            std::cout << "Read " << n << " bytes." << std::endl;
+            if(n == 0) {
+              std::cout << "Peer close the conenction." << std::endl;
+              close(connfd_);
+              connfd_ = kInvalidSocket;
+            }
         });
         channel_->onWrite([]{
             std::cout << "Handle Write In TcpServer." << std::endl;
@@ -27,8 +33,11 @@ public:
         epoller_->addChannel(channel_);
     }
     ~TcpConn() {
-      if(connfd_ != kInvalidSocket)
+      if(connfd_ != kInvalidSocket) {
         close(connfd_);
+        connfd_ = kInvalidSocket;
+      }
+      delete channel_;
     }
 private:
     EPoller* epoller_;

@@ -2,7 +2,7 @@
 #define EPOLLER_H
 
 #include <iostream>
-#include <set>
+#include <unordered_set>
 #include <sys/epoll.h>
 #include <assert.h>
 #include <string.h>
@@ -81,7 +81,8 @@ public:
                       << " :" << strerror(errno) << std::endl;
             assert(0);
         }
-        channels_.insert(ch);
+        auto p = channels_.insert(ch);
+        assert(p.second == true);
     }
 
     void removeChannel(Channel* ch);
@@ -89,7 +90,7 @@ public:
     void loop_once(int waitMs);
 private:
     int epfd_;
-    std::set<Channel*> channels_;
+    std::unordered_set<Channel*> channels_;
     struct epoll_event activeEvs_[kMaxEvents];
     bool quit_;
 };
